@@ -1,5 +1,5 @@
 import pygame 
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, TARGET_FPS
 from logger import log_state
 
 
@@ -9,6 +9,9 @@ def main():
   print(f"Screen height: {SCREEN_HEIGHT}")
 
   pygame.init()
+
+  clock = pygame.time.Clock()
+  dt = 0
   
   screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
@@ -21,6 +24,7 @@ def main():
       
     screen.fill("black")
     pygame.display.flip()
+    dt = clock.tick(TARGET_FPS) / 1000.0
 
 
 if __name__ == "__main__":
