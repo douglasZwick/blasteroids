@@ -1,29 +1,31 @@
 import pygame
 from circleshape import CircleShape
-from shot import Shot
+from bullet import Bullet
 from constants import (
   PLAYER_RADIUS,
   PLAYER_TURN_SPEED,
   PLAYER_SPEED,
   PLAYER_SHOOT_SPEED,
-  SHOT_COOLDOWN_SECONDS,
+  MAX_BULLETS,
   LINE_WIDTH,
 )
 
 
 class Player(CircleShape):
   rotation: float
-  shot_cooldown_timer: float
+  bullet_count: int
+  shot_requested: bool
 
-  def __init__(self, x: float, y: float):
+  def __init__(self, x: float, y: float) -> None:
     super().__init__(x, y, PLAYER_RADIUS)
     self.rotation = 0
-    self.shot_cooldown_timer = 0
+    self.bullet_count = 0
+    self.shot_requested = False
 
   def get_forward(self) -> pygame.Vector2:
     return pygame.Vector2(0, 1).rotate(self.rotation)
 
-  def triangle(self) -> list[pygame.Vector2]:
+  def get_mesh_points(self) -> list[pygame.Vector2]:
     forward = self.get_forward()
     right = pygame.Vector2(0, 1).rotate(self.rotation + 90) * self.radius / 1.5
     a = self.position + forward * self.radius
@@ -31,14 +33,17 @@ class Player(CircleShape):
     c = self.position - forward * self.radius + right
     return [a, b, c]
   
-  def draw(self, surface: pygame.Surface):
-    pygame.draw.polygon(surface, "white", self.triangle(), LINE_WIDTH)
+  def draw(self, surface: pygame.Surface) -> None:
+    pygame.draw.polygon(surface, "white", self.get_mesh_points(), LINE_WIDTH)
 
-  def rotate(self, dir: float, dt: float):
+  def rotate(self, dir: float, dt: float) -> None:
     d_rot = PLAYER_TURN_SPEED * dir * dt
     self.rotation += d_rot
 
-  def update(self, dt: float):
+  def shoot_key_pressed(self) -> None:
+    self.shot_requested = True
+
+  def update(self, dt: float) -> None:
     keys = pygame.key.get_pressed()
 
     if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
@@ -49,34 +54,39 @@ class Player(CircleShape):
       self.move(+1, dt)
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
       self.move(-1, dt)
-    if keys[pygame.K_SPACE]:
+
+    if self.shot_requested:
       self.attempt_shoot()
+    self.shot_requested = False
 
-    if self.shot_cooling_down():
-      self.shot_cooldown_timer -= dt
-
-  def move(self, dir: float, dt: float):
+  def move(self, dir: float, dt: float) -> None:
     forward = self.get_forward()
     velocity = forward * dir * PLAYER_SPEED
     self.position += velocity * dt
 
-  def shot_cooling_down(self) -> bool:
-    return self.shot_cooldown_timer > 0.0
+  def can_shoot(self) -> bool:
+    return self.bullet_count < MAX_BULLETS
 
-  def attempt_shoot(self):
-    if not self.shot_cooling_down():
+  def attempt_shoot(self) -> None:
+    if self.can_shoot():
       self.shoot()
 
-  def shoot(self):
-    shot = Shot(self.position.x, self.position.y)
-    shot_speed = PLAYER_SHOOT_SPEED
+  def shoot(self) -> None:
+    bullet = Bullet(self.position.x, self.position.y, self.bullet_died)
+    self.bullet_created()
+
+    bullet_speed = PLAYER_SHOOT_SPEED
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] or keys[pygame.K_UP]:
-      shot_speed += PLAYER_SPEED
+      bullet_speed += PLAYER_SPEED
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-      shot_speed -= PLAYER_SPEED
+      bullet_speed -= PLAYER_SPEED
 
-    shot.velocity = self.get_forward() * shot_speed
+    bullet.velocity = self.get_forward() * bullet_speed
 
-    self.shot_cooldown_timer = SHOT_COOLDOWN_SECONDS
+  def bullet_created(self) -> None:
+    self.bullet_count += 1
+
+  def bullet_died(self) -> None:
+    self.bullet_count -= 1

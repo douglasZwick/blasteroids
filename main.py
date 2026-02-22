@@ -4,7 +4,7 @@ from logger import log_state, log_event
 
 from player import Player
 from asteroid import Asteroid
-from shot import Shot
+from bullet import Bullet
 from asteroidfield import AsteroidField
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, TARGET_FPS
 from vectorfont import VectorFont
@@ -25,14 +25,15 @@ def main():
   updatables = pygame.sprite.Group()
   drawables = pygame.sprite.Group()
   asteroids = pygame.sprite.Group()
-  shots = pygame.sprite.Group()
+  bullets = pygame.sprite.Group()
 
   Player.containers = (updatables, drawables)
   Asteroid.containers = (updatables, drawables, asteroids)
   AsteroidField.containers = (updatables, )
-  Shot.containers = (updatables, drawables, shots)
+  Bullet.containers = (updatables, drawables, bullets)
   
-  screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+  surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+  bounds = surface.get_rect()
 
   _ = AsteroidField() # Curiously, we don't need to use this object...!
 
@@ -43,23 +44,31 @@ def main():
     log_state()
 
     for event in pygame.event.get():
-      if event.type == pygame.QUIT:
-        return
-    if pygame.key.get_pressed()[pygame.K_ESCAPE]:
-      return
+      match event.type:
+        case pygame.QUIT:
+          return
+        case pygame.KEYDOWN:
+          match event.key:
+            case pygame.K_ESCAPE:
+              return
+            case pygame.K_SPACE:
+              player.shoot_key_pressed()
     
     updatables.update(dt)
 
     for asteroid in asteroids:
       player_collision_check(asteroid, player)
       
-      for shot in shots:
-        shot_collision_check(asteroid, shot)
+      for bullet in bullets:
+        bullet_collision_check(asteroid, bullet)
+
+    for bullet in bullets:
+      bullet_bounds_check(bounds, bullet)
       
-    screen.fill("black")
+    surface.fill("black")
 
     for item in drawables:
-      item.draw(screen)
+      item.draw(surface)
 
     pygame.display.flip()
     dt = clock.tick(TARGET_FPS) / 1000.0
@@ -73,14 +82,18 @@ def player_collision_detected():
   print("Game over!")
   sys.exit()
 
-def shot_collision_check(asteroid: Asteroid, shot: Shot):
-  if asteroid.collides_with(shot):
-    shot_collision_detected(asteroid, shot)
+def bullet_collision_check(asteroid: Asteroid, bullet: Bullet):
+  if asteroid.collides_with(bullet):
+    bullet_collision_detected(asteroid, bullet)
 
-def shot_collision_detected(asteroid: Asteroid, shot: Shot):
+def bullet_collision_detected(asteroid: Asteroid, bullet: Bullet):
   log_event("asteroid_shot")
   asteroid.take_damage()
-  shot.kill()
+  bullet.die()
+
+def bullet_bounds_check(bounds: pygame.Rect, bullet: Bullet) -> None:
+  if not bounds.collidepoint(bullet.position):
+    bullet.die()
 
 
 if __name__ == "__main__":
