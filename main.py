@@ -1,5 +1,6 @@
 import sys
 import pygame
+import string
 from logger import log_state, log_event
 
 from player import Player
@@ -20,7 +21,10 @@ def main():
   clock = pygame.time.Clock()
   dt = 0
 
-  font = VectorFont("main", "mainfont.json")
+  surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+  bounds = surface.get_rect()
+
+  font = VectorFont(surface, "main", "mainfont.json")
   
   updatables = pygame.sprite.Group()
   drawables = pygame.sprite.Group()
@@ -32,9 +36,6 @@ def main():
   AsteroidField.containers = (updatables, )
   Bullet.containers = (updatables, drawables, bullets)
   
-  surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-  bounds = surface.get_rect()
-
   _ = AsteroidField() # Curiously, we don't need to use this object...!
 
   center_x, center_y = SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2
@@ -70,6 +71,8 @@ def main():
     for item in drawables:
       item.draw(surface)
 
+    font.text(string.ascii_uppercase, pygame.Vector2(15, 100))
+
     pygame.display.flip()
     dt = clock.tick(TARGET_FPS) / 1000.0
 
@@ -78,6 +81,7 @@ def player_collision_check(asteroid: Asteroid, player: Player):
     player_collision_detected()
 
 def player_collision_detected():
+  return
   log_event("player_hit")
   print("Game over!")
   sys.exit()

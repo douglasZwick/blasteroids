@@ -1,7 +1,8 @@
 import pygame
 import json
+import string
 from pathlib import Path
-from constants import VECTOR_FONT_POINT_WIDTH
+from constants import VECTOR_FONT_POINT_WIDTH, LINE_WIDTH
 
 VectorPath = list[list[float]]
 GlyphData = dict[str, list[VectorPath]]
@@ -10,10 +11,12 @@ VectorGlyph = list[VectorStroke]
 
 
 class VectorFont:
+  surface: pygame.Surface
   name: str
   glyphs: dict[str, VectorGlyph]
 
-  def __init__(self, name: str, path: str) -> None:
+  def __init__(self, surface: pygame.Surface, name: str, path: str) -> None:
+    self.surface = surface
     self.name = name
     self.glyphs = {}
 
@@ -26,6 +29,8 @@ class VectorFont:
         print(f"Successfully created {count} glyphs")
     except Exception as ex:
       print(f"Error reading font file {path}: {ex}")
+
+    # for _, glyph in self.glyphs.items():
 
   def add(self, key: str, value: VectorGlyph) -> None:
     self.glyphs[key] = value
@@ -66,3 +71,22 @@ class VectorFont:
         glyph.append((l, r))
     
     return glyph
+  
+  def draw_char(self, char: str, pos: pygame.Vector2) -> None:
+    self.draw_glyph(self.glyphs[char], pos)
+  
+  def draw_glyph(self, glyph: VectorGlyph, pos: pygame.Vector2) -> None:
+    size = pygame.Vector2(44, -88)
+    for stroke in glyph:
+      p0, p1 = stroke
+      start = p0.elementwise() * size + pos
+      end = p1.elementwise() * size + pos
+      pygame.draw.line(self.surface, "white", start, end, LINE_WIDTH)
+
+  def text(self, text: str, pos: pygame.Vector2) -> None:
+    spacing = 48
+    for i, char in enumerate(text):
+      if char not in string.ascii_uppercase:
+        continue
+      glyph_pos = pos + pygame.Vector2(i * spacing, 0)
+      self.draw_char(char, glyph_pos)
