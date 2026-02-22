@@ -76,7 +76,7 @@ def shot_collision_check(asteroid: Asteroid, shot: Shot):
 
 def shot_collision_detected(asteroid: Asteroid, shot: Shot):
   log_event("asteroid_shot")
-  asteroid.kill()
+  asteroid.take_damage()
   shot.kill()
 
 
