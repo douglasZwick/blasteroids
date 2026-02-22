@@ -7,6 +7,7 @@ from asteroid import Asteroid
 from shot import Shot
 from asteroidfield import AsteroidField
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT, TARGET_FPS
+from vectorfont import VectorFont
 
 
 def main():
@@ -18,6 +19,8 @@ def main():
 
   clock = pygame.time.Clock()
   dt = 0
+
+  font = VectorFont("main", "mainfont.json")
   
   updatables = pygame.sprite.Group()
   drawables = pygame.sprite.Group()
