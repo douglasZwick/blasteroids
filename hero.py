@@ -2,22 +2,22 @@ import pygame
 from circleshape import CircleShape
 from bullet import Bullet
 from constants import (
-  PLAYER_RADIUS,
-  PLAYER_TURN_SPEED,
-  PLAYER_SPEED,
-  PLAYER_SHOOT_SPEED,
+  HERO_RADIUS,
+  HERO_TURN_SPEED,
+  HERO_SPEED,
+  HERO_SHOOT_SPEED,
   MAX_BULLETS,
   LINE_WIDTH,
 )
 
 
-class Player(CircleShape):
+class Hero(CircleShape):
   rotation: float
   bullet_count: int
   shot_requested: bool
 
   def __init__(self, x: float, y: float) -> None:
-    super().__init__(x, y, PLAYER_RADIUS)
+    super().__init__(x, y, HERO_RADIUS)
     self.rotation = 0
     self.bullet_count = 0
     self.shot_requested = False
@@ -37,7 +37,7 @@ class Player(CircleShape):
     pygame.draw.polygon(surface, "white", self.get_mesh_points(), LINE_WIDTH)
 
   def rotate(self, dir: float, dt: float) -> None:
-    d_rot = PLAYER_TURN_SPEED * dir * dt
+    d_rot = HERO_TURN_SPEED * dir * dt
     self.rotation += d_rot
 
   def shoot_key_pressed(self) -> None:
@@ -61,7 +61,7 @@ class Player(CircleShape):
 
   def move(self, dir: float, dt: float) -> None:
     forward = self.get_forward()
-    velocity = forward * dir * PLAYER_SPEED
+    velocity = forward * dir * HERO_SPEED
     self.position += velocity * dt
 
   def can_shoot(self) -> bool:
@@ -75,13 +75,13 @@ class Player(CircleShape):
     bullet = Bullet(self.position.x, self.position.y, self.bullet_died)
     self.bullet_created()
 
-    bullet_speed = PLAYER_SHOOT_SPEED
+    bullet_speed = HERO_SHOOT_SPEED
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_w] or keys[pygame.K_UP]:
-      bullet_speed += PLAYER_SPEED
+      bullet_speed += HERO_SPEED
     if keys[pygame.K_s] or keys[pygame.K_DOWN]:
-      bullet_speed -= PLAYER_SPEED
+      bullet_speed -= HERO_SPEED
 
     bullet.velocity = self.get_forward() * bullet_speed
 
