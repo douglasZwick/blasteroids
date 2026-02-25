@@ -2,7 +2,7 @@ import pygame
 import random
 from logger import log_event
 from circleshape import CircleShape
-from constants import LINE_WIDTH, ASTEROID_MIN_RADIUS, ASTEROID_SPEED_SCALE_FACTOR
+from constants import OBJ_LINE_WIDTH, ASTEROID_MIN_RADIUS, ASTEROID_SPEED_SCALE_FACTOR
 
 
 class Asteroid(CircleShape):
@@ -13,7 +13,7 @@ class Asteroid(CircleShape):
     self.size = size
 
   def draw(self, surface: pygame.Surface):
-    pygame.draw.circle(surface, "white", self.position, self.radius, LINE_WIDTH)
+    pygame.draw.circle(surface, "white", self.position, self.radius, OBJ_LINE_WIDTH)
 
   def update(self, dt):
     self.position += self.velocity * dt

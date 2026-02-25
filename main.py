@@ -42,7 +42,7 @@ class Game:
     print("Creating bounds...")
     self.bounds = self.surface.get_rect()
     print("Creating font...")
-    self.font = VectorFont(self.surface, "main", "mainfont.json")
+    self.font = VectorFont(self.surface, "Main", "mainfont.json")
     
     print("Creating groups...")
     self.updatables = pygame.sprite.Group()
@@ -71,6 +71,8 @@ class Game:
     quit_requested = False
 
     self.surface.fill("black")
+    # center = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
+    # self.font.draw_char("i", center)
     self.font.demo()
 
     pygame.display.flip()

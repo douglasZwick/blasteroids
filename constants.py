@@ -3,7 +3,8 @@ SCREEN_HEIGHT: int = 720
 
 TARGET_FPS: float = 60
 
-LINE_WIDTH: int = 2
+OBJ_LINE_WIDTH: int = 2
+TEXT_LINE_WIDTH: int = 3
 
 HERO_RADIUS: float = 20
 HERO_TURN_SPEED: float = 300

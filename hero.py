@@ -7,7 +7,7 @@ from constants import (
   HERO_SPEED,
   HERO_SHOOT_SPEED,
   MAX_BULLETS,
-  LINE_WIDTH,
+  OBJ_LINE_WIDTH,
 )
 
 
@@ -34,7 +34,7 @@ class Hero(CircleShape):
     return [a, b, c]
   
   def draw(self, surface: pygame.Surface) -> None:
-    pygame.draw.polygon(surface, "white", self.get_mesh_points(), LINE_WIDTH)
+    pygame.draw.polygon(surface, "white", self.get_mesh_points(), OBJ_LINE_WIDTH)
 
   def rotate(self, dir: float, dt: float) -> None:
     d_rot = HERO_TURN_SPEED * dir * dt

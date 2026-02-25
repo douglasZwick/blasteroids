@@ -1,7 +1,7 @@
 import pygame
 from typing import Callable
 from circleshape import CircleShape
-from constants import LINE_WIDTH, BULLET_RADIUS, BULLET_LIFESPAN
+from constants import OBJ_LINE_WIDTH, BULLET_RADIUS, BULLET_LIFESPAN
 
 
 class Bullet(CircleShape):
@@ -14,7 +14,7 @@ class Bullet(CircleShape):
     self.lifetime = 0
 
   def draw(self, surface: pygame.Surface) -> None:
-    pygame.draw.circle(surface, "white", self.position, self.radius, LINE_WIDTH)
+    pygame.draw.circle(surface, "white", self.position, self.radius, OBJ_LINE_WIDTH)
 
   def update(self, dt: float) -> None:
     self.position += self.velocity * dt
