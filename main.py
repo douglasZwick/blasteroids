@@ -71,11 +71,6 @@ class Game:
     quit_requested = False
 
     self.surface.fill("black")
-    # center = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-    # self.font.draw_char("i", center)
-    self.font.demo()
-
-    pygame.display.flip()
 
     while not quit_requested:
       self.log_state()
@@ -91,28 +86,31 @@ class Game:
               case pygame.K_SPACE:
                 self.hero.shoot_key_pressed()
       
-      # self.updatables.update(dt)
+      # self.update_game_state(dt)
 
-      # for asteroid in self.asteroids:
-      #   self.hero_collision_check(asteroid, self.hero)
-        
-      #   for bullet in self.bullets:
-      #     self.bullet_collision_check(asteroid, bullet)
+      self.font.demo()
 
-      # for bullet in self.bullets:
-      #   self.bullet_bounds_check(self.bounds, bullet)
-        
-      # self.surface.fill("black")
-
-      # for item in self.drawables:
-      #   item.draw(self.surface)
-
-      # self.font.demo()
-
-      # pygame.display.flip()
-      # dt = self.clock.tick(TARGET_FPS) / 1000.0
+      pygame.display.flip()
+      dt = self.clock.tick(TARGET_FPS) / 1000.0
 
     self.shut_down()
+
+  def update_game_state(self, dt: float):
+    self.updatables.update(dt)
+
+    for asteroid in self.asteroids:
+      self.hero_collision_check(asteroid, self.hero)
+      
+      for bullet in self.bullets:
+        self.bullet_collision_check(asteroid, bullet)
+
+    for bullet in self.bullets:
+      self.bullet_bounds_check(self.bounds, bullet)
+      
+    self.surface.fill("black")
+
+    for item in self.drawables:
+      item.draw(self.surface)
 
   def game_over(self) -> None:
     pass

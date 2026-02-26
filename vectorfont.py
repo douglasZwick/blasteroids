@@ -1,8 +1,9 @@
 import pygame
+import pygame.gfxdraw
 import json
 from typing import Callable, TypedDict, cast
 from pathlib import Path
-from constants import VECTOR_FONT_POINT_WIDTH, TEXT_LINE_WIDTH
+from constants import TEXT_LINE_WIDTH
 
 Point = list[float]
 VectorPath = list[Point]
@@ -17,23 +18,32 @@ JsonFont = dict[str, JsonGlyph]
 VectorStroke = tuple[pygame.Vector2, pygame.Vector2]
 VectorGlyph = list[VectorStroke]
 
-DEFAULT_HALF_SPACING = pygame.Vector2(2, 2)
+DEFAULT_SPACING = pygame.Vector2(8, 8)
+DEFAULT_TEXT_COLOR = pygame.Color(255, 255, 255)
 
 
 class TextStyle:
-  size: float
+  size: float   # height in pixels
   aspect: float
   weight: int
   oblique: float
-  half_spacing: pygame.Vector2
+  spacing: pygame.Vector2
+  color: pygame.Color
 
   def __init__(self, size: float, aspect: float, weight: int, oblique: float,
-               half_spacing: pygame.Vector2) -> None:
+               spacing: pygame.Vector2, color: pygame.Color) -> None:
     self.size = size
     self.aspect = aspect
     self.weight = weight
     self.oblique = oblique
-    self.half_spacing = half_spacing
+    self.spacing = spacing
+    self.color = color
+
+  def get_size_vector(self) -> pygame.Vector2:
+    return pygame.Vector2(self.size * self.aspect, self.size)
+
+  def oblique_shift(self, y: float) -> float:
+    return (self.oblique * self.aspect) * (1.0 - y)
 
 
 class VectorFont:
@@ -46,8 +56,9 @@ class VectorFont:
     self.surface = surface
     self.name = name
     self.glyphs = {}
-    self.default_style = TextStyle(size=60, aspect=1/2, weight=3, oblique=0,
-                                   half_spacing=DEFAULT_HALF_SPACING)
+    self.default_style = TextStyle(size=80, aspect=1, weight=TEXT_LINE_WIDTH, oblique=1,
+                                   spacing=DEFAULT_SPACING,
+                                   color=DEFAULT_TEXT_COLOR)
 
     data_path = Path(__file__).with_name(path)
     # Intentionally not using a try-catch here. If something fails with loading,
@@ -103,28 +114,34 @@ class VectorFont:
   def draw_glyph(self, glyph: VectorGlyph, pos: pygame.Vector2,
                  _style: TextStyle | None = None) -> None:
     style: TextStyle = self.default_style if _style is None else _style
-    size = pygame.Vector2(44, 88)
+    size = style.get_size_vector()
     for stroke in glyph:
-      p0, p1 = stroke
+      p0, p1 = stroke[0].copy(), stroke[1].copy()
+      p0.x += style.oblique_shift(p0.y)
+      p1.x += style.oblique_shift(p1.y)
       p0, p1 = p0.elementwise() * size, p1.elementwise() * size
       p0, p1 = p0 + pos, p1 + pos
       if p0 == p1:
-        p0.x -= VECTOR_FONT_POINT_WIDTH
-        p1.x += VECTOR_FONT_POINT_WIDTH
-      pygame.draw.line(self.surface, "white", p0, p1, style.weight)
+        pygame.draw.circle(self.surface, style.color, p0, style.weight)
+      else:
+        pygame.draw.line(self.surface, style.color, p0, p1, style.weight)
+        # pygame.draw.circle(self.surface, style.color, p0, style.weight)
+        # pygame.draw.circle(self.surface, style.color, p1, style.weight)
 
   def text(self, text: str, pos: pygame.Vector2,
            _style: TextStyle | None = None) -> None:
-    spacing = 48
+    style: TextStyle = self.default_style if _style is None else _style
+    spacing = style.get_size_vector().x + style.spacing.x
     for i, char in enumerate(text):
       if char == " " or not char.isprintable():
         continue
       glyph_pos = pos + pygame.Vector2(i * spacing, 0)
       self.draw_char(char, glyph_pos, _style)
 
-  def demo(self) -> None:
+  def demo(self, _style: TextStyle | None = None) -> None:
+    style: TextStyle = self.default_style if _style is None else _style
     origin = pygame.Vector2(30, 30)
-    line_height = 96
+    line_height = style.get_size_vector().y + style.spacing.y
     start = 32
     end = 128
     step = 16
