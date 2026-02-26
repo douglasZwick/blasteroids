@@ -1,17 +1,25 @@
 import sys
 import pygame
-import string
 import logger
 
+from gamestatemanager import GameStateManager
 from hero import Hero
 from asteroid import Asteroid
 from bullet import Bullet
 from asteroidfield import AsteroidField
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, TARGET_FPS, LOGGING_ENABLED
 from vectorfont import VectorFont
+from constants import (
+  SCREEN_WIDTH,
+  SCREEN_HEIGHT,
+  TARGET_FPS,
+  LOGGING_ENABLED,
+  INITIAL_DT,
+)
 
 
 class Game:
+  gsm: GameStateManager
+
   clock: pygame.time.Clock
   surface: pygame.Surface
   bounds: pygame.Rect
@@ -32,42 +40,34 @@ class Game:
     print(f"Screen height: {SCREEN_HEIGHT}")
 
     pygame.init()
-    print("pygame initialized")
 
-    print("Creating clock...")
     self.clock = pygame.time.Clock()
-    print("Creating surface...")
     self.surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     # TODO: research how to use pygame.OPENGL
-    print("Creating bounds...")
     self.bounds = self.surface.get_rect()
-    print("Creating font...")
+
+    self.gsm = GameStateManager("title")
     self.font = VectorFont(self.surface, "Main", "mainfont.json")
     
-    print("Creating groups...")
     self.updatables = pygame.sprite.Group()
     self.drawables = pygame.sprite.Group()
     self.asteroids = pygame.sprite.Group()
     self.bullets = pygame.sprite.Group()
 
-    print("Assigning groups...")
     Hero.containers = (self.updatables, self.drawables)
     Asteroid.containers = (self.updatables, self.drawables, self.asteroids)
     AsteroidField.containers = (self.updatables, )
     Bullet.containers = (self.updatables, self.drawables, self.bullets)
 
-    print("Creating asteroid field...")
     _ = AsteroidField()
 
-    print("Creating hero...")
     c_x, c_y = SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2
     self.hero = Hero(c_x, c_y)
 
     self.logging_enabled = LOGGING_ENABLED
 
   def run(self) -> None:
-    print("-- Beginning main loop --")
-    dt = 0.0
+    dt = INITIAL_DT
     quit_requested = False
 
     self.surface.fill("black")
@@ -86,9 +86,9 @@ class Game:
               case pygame.K_SPACE:
                 self.hero.shoot_key_pressed()
       
-      # self.update_game_state(dt)
+      self.update_game_state(dt)
 
-      self.font.demo()
+      # self.font.demo()
 
       pygame.display.flip()
       dt = self.clock.tick(TARGET_FPS) / 1000.0
@@ -123,7 +123,6 @@ class Game:
       self.hero_collision_detected()
 
   def hero_collision_detected(self) -> None:
-    return
     self.log_event("player_hit")
     print("Game over!")
     sys.exit()

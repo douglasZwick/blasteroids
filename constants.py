@@ -2,6 +2,7 @@ SCREEN_WIDTH: int = 1280
 SCREEN_HEIGHT: int = 720
 
 TARGET_FPS: float = 60
+INITIAL_DT: float = 0.0
 
 OBJ_LINE_WIDTH: int = 2
 TEXT_LINE_WIDTH: int = 3

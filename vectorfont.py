@@ -60,14 +60,14 @@ class VectorFont:
                                    spacing=DEFAULT_SPACING,
                                    color=DEFAULT_TEXT_COLOR)
 
+    print(f"Creating font {name} from path {path}...")
     data_path = Path(__file__).with_name(path)
     # Intentionally not using a try-catch here. If something fails with loading,
     # then the UI will be broken one way or another, so let's just let the exception go uncaught
     with open(data_path, "r") as font_file:
       json_data = cast(JsonFont, json.load(font_file))
-      print(f"Creating glyphs from font file {path}:")
       count = self.create_glyphs(json_data)
-      print(f"Successfully created {count} glyphs")
+      print(f"  Successfully created {count} glyphs")
 
   def add(self, key: str, value: VectorGlyph) -> None:
     self.glyphs[key] = value
@@ -76,7 +76,6 @@ class VectorFont:
     count = 0
 
     for key, json_glyph in data.items():
-      print(f"  Creating glyph '{key}'...")
       vector_glyph = self.create_glyph(json_glyph)
       self.add(key, vector_glyph)
       count += 1
